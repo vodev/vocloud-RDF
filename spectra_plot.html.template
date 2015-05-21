@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Highcharts Example</title>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <style type="text/css">
+
+    </style>
+    <script type="text/javascript">
+    $$(function() {
+$$('#plot').highcharts({
+
+        plotOptions: {
+            line: {
+                animation: false
+            }
+        },
+        chart: {
+            zoomType: 'x'
+        },
+        title: {
+            text: '${name} classified as ${class}',
+            x: -20 //center
+        },
+            xAxis: {
+                categories: ${cats},
+                tickInterval: 50
+            },
+            yAxis: {
+                title: {
+                    text: 'Intensity'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+           
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            },
+
+
+        series: [{
+            name: '${name}',
+            data: ${points}
+        }]
+});
+});
+    </script>
+  </head>
+  <body>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<div id="info">
+
+</div>
+<div id="plot" style="height: 400px; min-width: 310px; margin: 0 auto"></div>
+</body>
+</html>

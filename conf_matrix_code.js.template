@@ -1,0 +1,58 @@
+$$('#conf_matrix_${key}').highcharts({
+
+        chart: {
+            type: 'heatmap',
+            marginTop: 40,
+            marginBottom: 40
+        },
+
+
+        title: {
+            text: 'Confusion matrix'
+        },
+
+        xAxis: {
+            categories: ${cat_names}
+        },
+
+        yAxis: {
+            categories: ${cat_names},
+            title: null
+        },
+
+        colorAxis: {
+            min: 0,
+            minColor: '#FFFFFF',
+            maxColor: Highcharts.getOptions().colors[0]
+        },
+
+        legend: {
+            align: 'right',
+            layout: 'vertical',
+            margin: 0,
+            verticalAlign: 'top',
+            y: 25,
+            symbolHeight: 320
+        },
+
+        tooltip: {
+            formatter: function () {
+                return 'Class <b>' + this.series.xAxis.categories[this.point.x] + '</b> was classified as <b>' + this.series.yAxis.categories[this.point.y] + '</b>' + this.point.value + ' times';
+            }
+        },
+
+        series: [{
+            name: 'Confusion matrix',
+            borderWidth: 1,
+            data: ${conf_matrix_data},
+            dataLabels: {
+                enabled: true,
+                color: 'black',
+                style: {
+                    textShadow: 'none',
+                    HcTextStroke: null
+                }
+            }
+        }]
+
+});
