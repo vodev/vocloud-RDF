@@ -63,7 +63,7 @@ def __generate_conf_matrix_pages(logged_data, data_sets, out_dir):
 
 def __generate_spectra(logger_data, data_sets, set_key, out_dir):
     spectra_plot_template = None
-    with open("spectra_plot.html.template") as file:
+    with open(__script_dir + "/spectra_plot.html.template") as file:
         spectra_plot_template = string.Template(file.read())
     out_dir += "/spectra/"
     for key, data in logger_data.items():
