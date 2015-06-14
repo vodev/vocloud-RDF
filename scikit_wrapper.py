@@ -48,9 +48,12 @@ class SkLearnForest(base_wrapper.BaseForest):
         return met.f1_score(data[self.forest_config.label], predicted, average=None).tolist()
 
     def confusion_matrix(self, data_key):
+        """Computes a confusion matrix for given data
+           and returns the associated matrix along with
+           the predicted data"""
         predicted = self.predict(data_key)
         data = self.wrapper.data[data_key]
-        return met.confusion_matrix(data[self.forest_config.label], predicted).tolist()
+        return met.confusion_matrix(data[self.forest_config.label], predicted).tolist(), predicted.tolist()
 
 
 class SkLearnWrapper(base_wrapper.BaseWrapper):

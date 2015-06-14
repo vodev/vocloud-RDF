@@ -37,7 +37,7 @@ $$('#conf_matrix_${key}').highcharts({
 
         tooltip: {
             formatter: function () {
-                return 'Class <b>' + this.series.xAxis.categories[this.point.x] + '</b> was classified as <b>' + this.series.yAxis.categories[this.point.y] + '</b>' + this.point.value + ' times';
+                return 'Class <b>' + this.series.xAxis.categories[this.point.x] + '</b> was classified as <b> ' + this.series.yAxis.categories[this.point.y] + '</b>' + this.point.value + ' times';
             }
         },
 
@@ -53,6 +53,17 @@ $$('#conf_matrix_${key}').highcharts({
                     HcTextStroke: null
                 }
             }
-        }]
+        }],
+        plotOptions: {
+            heatmap: {
+                point: {
+                    events: {
+                        click: function(event) {
+                        location.href = "${key}_conf_matrix_list_" + this.x + "_" + this.y + ".html";
+                        }
+                    }
+                }
+            }
+        },
 
 });

@@ -1,7 +1,7 @@
 import json
 import io
 import os
-import string
+
 class ResultLog(object):
     """docstring for ResultLog"""
     out_data = {}

@@ -26,9 +26,11 @@ def compute_conf_matrix(forest, test_set_uri, test_set_config, logger):
                                           header=False if
                                           test_set_config is None
                                           else test_set_config['header'])
-    matrix = forest.confusion_matrix(data_key)
+    matrix, data = forest.confusion_matrix(data_key)
     for value in matrix:
-        logger.add_result('conf_matrix', value)
+        logger.add_result('conf_matrix/matrix', value)
+    logger.add_result('conf_matrix/data', data)
+
     return matrix
 
 def compute_f1_score(forest, test_set_uri, test_set_config, logger):

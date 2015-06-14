@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Spectra of class ${true_class} classified as ${classified_class}</title>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <style type="text/css">
+
+    </style>
+      <h1>Spectra of class ${true_class} classified as ${classified_class}</h1>
+        <ul>
+            ${list}
+        </ul>
+</body>
+</html>

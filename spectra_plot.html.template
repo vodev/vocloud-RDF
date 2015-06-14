@@ -21,7 +21,7 @@ $$('#plot').highcharts({
             zoomType: 'x'
         },
         title: {
-            text: '${name} classified as ${class}',
+            text: '${name}',
             x: -20 //center
         },
             xAxis: {
