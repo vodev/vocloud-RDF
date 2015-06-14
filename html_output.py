@@ -53,10 +53,9 @@ def __generate_conf_matrix_pages(logged_data, data_sets, out_dir):
             code = _generate_conf_matrix_subpage(key, coordinate, spectra)
             #we have "normalize" classes so they will be integers starting from 0"
             classes = sorted(data_sets[key]["score_set"]["class"].unique())
-            max_class = len(classes) - 1
             normalized_classes = {val:idx for idx, val in enumerate(classes)}
             with open(out_dir + key + "_conf_matrix_list_" + str(normalized_classes[coordinate[0]]) + "_" +
-                      str(max_class - normalized_classes[coordinate[1]]) + ".html", "w") as out_file:
+                      str(normalized_classes[coordinate[1]]) + ".html", "w") as out_file:
                 out_file.write(code)
     __generate_spectra(logged_data, data_sets, "score_set", out_dir)
 
@@ -66,6 +65,10 @@ def __generate_spectra(logger_data, data_sets, set_key, out_dir):
     with open(__script_dir + "/spectra_plot.html.template") as file:
         spectra_plot_template = string.Template(file.read())
     out_dir += "/spectra/"
+    try:
+        os.mkdir(out_dir)
+    except OSError:
+        pass
     for key, data in logger_data.items():
         all_spectra = data_sets[key][set_key]
         categories = json.dumps([i for i in range(0, len(all_spectra.columns))])
@@ -109,7 +112,7 @@ def output_to_html(data, data_sets=None, out_dir='./'):
 
     substitutes['conf_matrix_div'] = __generate_conf_matrix_div(data.keys())
     substitutes['f1_score'] = json.dumps(f1_data)
-    substitutes['cat_names'] = ['A', 'B', 'C', 'D']
+    substitutes['cat_names'] = sorted(data_sets[list(data_sets.keys())[0]]["train_set"]["class"].unique())
     substitutes['conf_matrix_code'] = __generate_conf_matrix_code(conf_matrix_data, substitutes['cat_names'])
     substitutes['classified_data'], substitutes['classified_data_links'] = __generate_data(classified_data, data_sets,
                                                                                            "test_set", out_dir)

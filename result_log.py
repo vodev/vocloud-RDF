@@ -5,7 +5,7 @@ import os
 class ResultLog(object):
     """docstring for ResultLog"""
     out_data = {}
-    output_dir = os.path.abspath('./results')
+    output_dir = os.path.abspath('./')
     def __init__(self, key_prefix=None):
         super(ResultLog, self).__init__()
         print("Creating logger with prefix " + key_prefix)
