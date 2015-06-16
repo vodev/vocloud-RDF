@@ -38,7 +38,7 @@ $$('#plot').highcharts({
                     color: '#808080'
                 }]
             },
-           
+
             legend: {
                 layout: 'vertical',
                 align: 'right',

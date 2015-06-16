@@ -59,7 +59,7 @@ $$('#conf_matrix_${key}').highcharts({
                 point: {
                     events: {
                         click: function(event) {
-                        location.href = "${key}_conf_matrix_list_" + this.x + "_" + this.y + ".html";
+                        location.href = this.x + "_" + this.y + "/matrix.html";
                         }
                     }
                 }

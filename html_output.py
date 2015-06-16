@@ -1,11 +1,12 @@
 import string
 import json
 import os
-
+import pandas as pd
+from pprint import  pprint
 __DIV_TEMPLATE = string.Template(
     '<div id="conf_matrix_${key}" style="height: 400px; min-width: 310px; max-width: 800px; margin: 0 auto"></div>\n')
 __LINK_TEMPLATE = string.Template(
-    '<li><a id="${spectrum_name}_link" href="./spectra/spectrum_${spectrum_name}.html">${spectrum_name_short} as ${class}</a></li>\n')
+    '<option id="${spectrum_name}_link">${spectrum_name}</option>\n')
 __LINK_SECTION_TEMPLATE = string.Template('<section id="${key"}><h2>${key}</h2>\n${spectra_links}</section>')
 __script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -20,10 +21,10 @@ def __group_spectra(logged_data, data_sets):
             spectrum = score_set.iloc[idx]
             true_label = spectrum['class']
             coordinates = true_label, label
-            print(coordinates)
             if coordinates not in groups[key]:
-                groups[key][coordinates] = []
-            groups[key][coordinates].append(spectrum)
+                groups[key][coordinates] = pd.DataFrame()
+            groups[key][coordinates] = groups[key][coordinates].append(spectrum)
+
     return groups
 
 
@@ -31,17 +32,19 @@ def _generate_conf_matrix_subpage(key, coordinate, spectra):
     with open(__script_dir + "/spectra_list.html.template") as template_file:
         html_template = string.Template(template_file.read())
     spectra_list = []
-    for spectrum in spectra:
+    for index, spectrum in spectra.iterrows():
         spectrum_link = __LINK_TEMPLATE.substitute({'class': coordinate[1], 'spectrum_name': key + "_" + spectrum["id"],
                                                     'spectrum_name_short': spectrum["id"]})
         spectra_list.append(spectrum_link)
+    categories = json.dumps(spectra.columns.values.tolist())
+
     html_code = html_template.substitute(
-        {"list": "".join(spectra_list), "true_class": coordinate[0], "classified_class": coordinate[1]})
+        {"list": "".join(spectra_list), "true_class": coordinate[0], "classified_class": coordinate[1],
+         "cats": categories})
     return html_code
 
 
 def __generate_conf_matrix_pages(logged_data, data_sets, out_dir):
-    out_dir += "/"
     all_groups = __group_spectra(logged_data, data_sets)
     """ out_dir += "/matrix_subpages/"
     try:
@@ -51,36 +54,24 @@ def __generate_conf_matrix_pages(logged_data, data_sets, out_dir):
     for key, groups in all_groups.items():
         for coordinate, spectra in groups.items():
             code = _generate_conf_matrix_subpage(key, coordinate, spectra)
-            #we have "normalize" classes so they will be integers starting from 0"
+            # we have "normalize" classes so they will be integers starting from 0"
             classes = sorted(data_sets[key]["score_set"]["class"].unique())
-            normalized_classes = {val:idx for idx, val in enumerate(classes)}
-            with open(out_dir + key + "_conf_matrix_list_" + str(normalized_classes[coordinate[0]]) + "_" +
-                      str(normalized_classes[coordinate[1]]) + ".html", "w") as out_file:
+            normalized_classes = {val: idx for idx, val in enumerate(classes)}
+            matrix_dir = out_dir + "/" + str(normalized_classes[coordinate[0]]) + "_" \
+                         + str(normalized_classes[coordinate[1]])
+            try:
+                os.mkdir(matrix_dir)
+            except OSError:
+                pass
+            with open(matrix_dir + "/matrix.html", "w") as out_file:
                 out_file.write(code)
-    __generate_spectra(logged_data, data_sets, "score_set", out_dir)
+            __generate_spectra(logged_data, spectra, matrix_dir)
 
 
-def __generate_spectra(logger_data, data_sets, set_key, out_dir):
-    spectra_plot_template = None
-    with open(__script_dir + "/spectra_plot.html.template") as file:
-        spectra_plot_template = string.Template(file.read())
-    out_dir += "/spectra/"
-    try:
-        os.mkdir(out_dir)
-    except OSError:
-        pass
-    for key, data in logger_data.items():
-        all_spectra = data_sets[key][set_key]
-        categories = json.dumps([i for i in range(0, len(all_spectra.columns))])
-        for index, row in all_spectra.iterrows():
-            if "class" in all_spectra:
-                points = json.dumps(row.tolist()[1:-1])
-            else:
-                points = json.dumps(row.tolist()[1:])
-            html_code = spectra_plot_template.substitute({'name': key, 'points': points, 'cats': categories})
-            spectrum_name = key + '_' + row["id"]
-            with open(out_dir + 'spectrum_' + spectrum_name + '.html', 'w') as spectra_file:
-                spectra_file.write(html_code)
+def __generate_spectra(logger_data, group, out_dir):
+    group_without_id_and_class = group.drop(["id", "class"], axis=1)
+    print("saving spectra to " + out_dir)
+    group_without_id_and_class.to_csv(path_or_buf=out_dir + "/spectra.txt", sep=",", header=False, index=False)
 
 
 def output_to_html(data, data_sets=None, out_dir='./'):

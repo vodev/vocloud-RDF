@@ -1,5 +1,4 @@
 <!DOCTYPE HTML>
-<html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Spectra of class ${true_class} classified as ${classified_class}</title>
@@ -8,9 +7,103 @@
     <style type="text/css">
 
     </style>
+    <script type="text/javascript">
+        var options = null;
+        var series = [];
+    $$(function() {
+        options = {
+
+            plotOptions: {
+                line: {
+                    animation: false
+                }
+
+            },
+            chart: {
+                zoomType: 'x',
+                renderTo: "plot"
+            },
+            title: {
+                x: -20 //center
+            },
+            xAxis: {
+                tickInterval: 50,
+                categories: ${cats}
+            },
+            yAxis: {
+                title: {
+                    text: 'Intensity'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            },
+            series: []
+        };
+        var chart = new Highcharts.Chart(options);
+        $$.ajax("spectra.txt", {
+            success: function (data) {
+                rows = data.split("\n");
+                for (row in rows) {
+                    points = rows[row].split(",");
+                    pointsFloat = []
+                    for (idx in points) {
+                        pointsFloat.push(parseFloat(points[idx]))
+                    }
+                    series.push(pointsFloat)
+                }
+                options.series = series
+
+            }
+        })
+    });
+        function reloadSpectra()
+        {
+            console.log("reloading")
+            var selected = $$('#spectra_list').find(":selected");
+            var selectedNames =[]
+            var selectedIndex =[]
+            for(opt in selected.toArray())
+            {
+                selectedIndex.push(selected[opt].index)
+                selectedNames.push(selected[opt].text)
+            }
+            var chart_data = [];
+            for(idx in series)
+            {
+                indexInSelected = selectedIndex.indexOf(parseInt(idx));
+                if(indexInSelected != -1)
+                {
+
+                    chart_data.push({"data": series[idx], "name": selectedNames[indexInSelected]});
+                }
+            }
+            options.series = chart_data;
+            chart = new Highcharts.Chart(options);
+        }
+    </script>
+  </head>
+<body>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
       <h1>Spectra of class ${true_class} classified as ${classified_class}</h1>
-        <ul>
-            ${list}
-        </ul>
+    <form id="spectra_list">
+        <select name="spectra" multiple>
+                ${list}
+        </select>
+    </form>
+   <button onclick="reloadSpectra()">Load</button>
+
+    <div id="plot" style="height: 400px; min-width: 310px; margin: 0 auto"></div>
 </body>
 </html>
