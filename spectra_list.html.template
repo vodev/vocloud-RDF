@@ -10,95 +10,95 @@
     <script type="text/javascript">
         var options = null;
         var series = [];
+        var chart = null;
+
     $$(function() {
-        options = {
-
-            plotOptions: {
-                line: {
-                    animation: false
-                }
-
-            },
-            chart: {
-                zoomType: 'x',
-                renderTo: "plot"
-            },
-            title: {
-                x: -20 //center
-            },
-            xAxis: {
-                tickInterval: 50,
-                categories: ${cats}
-            },
-            yAxis: {
-                title: {
-                    text: 'Intensity'
-                },
-                plotLines: [{
-                    value: 0,
-                    width: 1,
-                    color: '#808080'
-                }]
-            },
-
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'middle',
-                borderWidth: 0
-            },
-            series: []
-        };
-        var chart = new Highcharts.Chart(options);
         $$.ajax("spectra.txt", {
             success: function (data) {
-                rows = data.split("\n");
-                for (row in rows) {
-                    points = rows[row].split(",");
-                    pointsFloat = []
-                    for (idx in points) {
-                        pointsFloat.push(parseFloat(points[idx]))
+                var rows = data.split("\n");
+                for (var row in rows) {
+                    var points = rows[row].split(",");
+                    var pointsFloat = [];
+                    for (var idx in points) {
+                        var num = parseFloat(points[idx]);
+                        if(isFinite(num))
+                        {
+                            pointsFloat.push(num)
+                        }
                     }
                     series.push(pointsFloat)
                 }
-                options.series = series
-
+                showSpectra($$('#spectra_list option').slice(0, 10));
             }
         })
     });
+        function range(low, high)
+        {
+            var range = [];
+            while(low < high)
+            {
+                range.push(low++);
+            }
+            return range;
+        }
+
+        function transpose(matrix)
+        {
+            return matrix[0].map(function(col, i) {
+                return matrix.map(function(row) {
+                        return row[i]
+                })
+            });
+        }
+
+        function showSpectra(selected){
+            var selectedNames = ["length"];
+            var selectedIndex = [];
+            for(var opt in selected.toArray())
+            {
+                selectedIndex.push(selected[opt].index);
+                selectedNames.push(selected[opt].text);
+            }
+            var chartData = [];
+            first_row = ${cats};
+            chartData.push(first_row);
+            for(var idx in series)
+            {
+                var indexInSelected = selectedIndex.indexOf(parseInt(idx));
+                if(indexInSelected != -1)
+                {
+
+                    chartData.push(series[idx]);
+                }
+            }
+            chartData = transpose(chartData);
+            if(!chart)
+            {
+                chart = new Dygraph(document.getElementById("plot"), chartData, {
+                labels: selectedNames,
+                animatedZooms: true
+                });
+            }
+            else
+            {
+                chart.updateOptions({"file": chartData, "labels": selectedNames });
+            }
+        }
+
         function reloadSpectra()
         {
             console.log("reloading")
             var selected = $$('#spectra_list').find(":selected");
-            var selectedNames =[]
-            var selectedIndex =[]
-            for(opt in selected.toArray())
-            {
-                selectedIndex.push(selected[opt].index)
-                selectedNames.push(selected[opt].text)
-            }
-            var chart_data = [];
-            for(idx in series)
-            {
-                indexInSelected = selectedIndex.indexOf(parseInt(idx));
-                if(indexInSelected != -1)
-                {
-
-                    chart_data.push({"data": series[idx], "name": selectedNames[indexInSelected]});
-                }
-            }
-            options.series = chart_data;
-            chart = new Highcharts.Chart(options);
+            showSpectra(selected);
         }
     </script>
   </head>
 <body>
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/heatmap.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
+
       <h1>Spectra of class ${true_class} classified as ${classified_class}</h1>
-    <form id="spectra_list">
-        <select name="spectra" multiple>
+    <form  id="spectra_list">
+        <select style="height: 200px;min-width:100%" name="spectra" multiple>
                 ${list}
         </select>
     </form>
