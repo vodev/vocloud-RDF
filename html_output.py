@@ -36,10 +36,10 @@ def _generate_conf_matrix_subpage(key, coordinate, spectra):
         spectrum_link = __LINK_TEMPLATE.substitute({'class': coordinate[1], 'spectrum_name': key + "_" + spectrum["id"],
                                                     'spectrum_name_short': spectrum["id"]})
         spectra_list.append(spectrum_link)
-    categories = json.dumps(spectra.columns.values.tolist())
+    categories = json.dumps([float(item) for item in spectra.columns.values.tolist()[:-2]])
 
     html_code = html_template.substitute(
-        {"list": "".join(spectra_list), "true_class": coordinate[0], "classified_class": coordinate[1],
+        {"list": "\n".join(spectra_list), "true_class": coordinate[0], "classified_class": coordinate[1],
          "cats": categories})
     return html_code
 

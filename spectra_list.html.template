@@ -15,6 +15,7 @@
     $$(function() {
         $$.ajax("spectra.txt", {
             success: function (data) {
+                console.log("spectra loaded")
                 var rows = data.split("\n");
                 for (var row in rows) {
                     var points = rows[row].split(",");
