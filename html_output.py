@@ -23,7 +23,12 @@ def __group_spectra(logged_data, data_sets):
             coordinates = true_label, label
             if coordinates not in groups[key]:
                 groups[key][coordinates] = pd.DataFrame()
-            groups[key][coordinates] = groups[key][coordinates].append(spectrum)
+            try:
+                groups[key][coordinates] = groups[key][coordinates].append(spectrum)
+            except TypeError:
+                pprint(spectrum)
+                pprint(groups[key][coordinates])
+                raise
 
     return groups
 
@@ -33,8 +38,8 @@ def _generate_conf_matrix_subpage(key, coordinate, spectra):
         html_template = string.Template(template_file.read())
     spectra_list = []
     for index, spectrum in spectra.iterrows():
-        spectrum_link = __LINK_TEMPLATE.substitute({'class': coordinate[1], 'spectrum_name': key + "_" + spectrum["id"],
-                                                    'spectrum_name_short': spectrum["id"]})
+        spectrum_link = __LINK_TEMPLATE.substitute({'class': coordinate[1], 'spectrum_name': key + "_" + spectrum.name,
+                                                    'spectrum_name_short': spectrum.name})
         spectra_list.append(spectrum_link)
     categories = json.dumps([float(item) for item in spectra.columns.values.tolist()[:-2]])
 
@@ -52,10 +57,10 @@ def __generate_conf_matrix_pages(logged_data, data_sets, out_dir):
     except OSError:
         pass"""
     for key, groups in all_groups.items():
+        classes = sorted(data_sets[key]["score_set"]["class"].unique())
         for coordinate, spectra in groups.items():
             code = _generate_conf_matrix_subpage(key, coordinate, spectra)
             # we have "normalize" classes so they will be integers starting from 0"
-            classes = sorted(data_sets[key]["score_set"]["class"].unique())
             normalized_classes = {val: idx for idx, val in enumerate(classes)}
             matrix_dir = out_dir + "/" + str(normalized_classes[coordinate[0]]) + "_" \
                          + str(normalized_classes[coordinate[1]])
@@ -69,7 +74,7 @@ def __generate_conf_matrix_pages(logged_data, data_sets, out_dir):
 
 
 def __generate_spectra(logger_data, group, out_dir):
-    group_without_id_and_class = group.drop(["id", "class"], axis=1)
+    group_without_id_and_class = group.drop(["class"], axis=1)
     print("saving spectra to " + out_dir)
     group_without_id_and_class.to_csv(path_or_buf=out_dir + "/spectra.txt", sep=",", header=False, index=False)
 
@@ -143,7 +148,7 @@ def __generate_data(data, data_sets, set_key, out_dir):
                 points = json.dumps(all_spectra.iloc[index].tolist())
             html_code = html_code_template.substitute({'name': key, 'points': points, 'cats': categories,
                                                        'class': predicted[index]})
-            spectrum_name = key + '_' + all_spectra.iloc[index]["id"]
+            spectrum_name = key + '_' + all_spectra.iloc[index].name
             link_code = __LINK_TEMPLATE.substitute({'class': predicted[index], 'spectrum_name': spectrum_name,
                                                     'spectrum_name_short': index})
             links += link_code

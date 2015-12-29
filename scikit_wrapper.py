@@ -88,7 +88,7 @@ class SkLearnWrapper(base_wrapper.BaseWrapper):
         key = os.path.basename(uri)
         print("header " + str(header))
         if key not in SkLearnWrapper.data:
-            SkLearnWrapper.data[key] = pd.read_csv(uri, header=0 if header else None, sep=None, dtype=None, na_values='?', skipinitialspace=True)
+            SkLearnWrapper.data[key] = pd.read_csv(uri, header=None, names=header, sep=None, dtype=None, na_values='?', skipinitialspace=True)
         return key
 
     def train_forest(self, data_key):
@@ -96,6 +96,7 @@ class SkLearnWrapper(base_wrapper.BaseWrapper):
         pprint(data_set)
         target = data_set[self.config.label].values
         pprint(target)
+        pprint(data_set.columns)
         columns = [column for column in data_set.columns if column not in self.config.ignore and column != self.config.label]
         features = data_set[columns].values
         pprint(features)

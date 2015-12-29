@@ -103,7 +103,8 @@
                 ${list}
         </select>
     </form>
-   <button onclick="reloadSpectra()">Load</button>
+    <button onclick="reloadSpectra()" style="font-size: 120%;margin: 20px;width:100px">Load</button>
+
 
     <div id="plot" style="height: 400px; min-width: 310px; margin: 0 auto"></div>
 </body>
